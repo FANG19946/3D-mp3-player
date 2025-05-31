@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Html, useGLTF } from '@react-three/drei';
-import { MeshPhysicalMaterial, SRGBColorSpace, TextureLoader } from 'three';
+import { Euler, MeshPhysicalMaterial, Quaternion, SRGBColorSpace, TextureLoader, Vector3 } from 'three';
 
 export default function Ipod(props) {
   const gltf = useGLTF('/ipod_with_screen.glb');
   const groupRef = useRef();
   const screenRef = useRef();
   const [showUI, setShowUI] = useState(false);
+  
 
   useEffect(() => {
     if (!groupRef.current) return;
@@ -55,27 +56,47 @@ export default function Ipod(props) {
   }, []);
 
   return (
-    <>
-      <primitive object={gltf.scene} ref={groupRef} {...props} />
-      {showUI && screenRef.current && (
+  <>
+    <primitive object={gltf.scene} ref={groupRef} {...props} />
+
+    {showUI && screenRef.current && (() => {
+      // Get the world position and quaternion of the screen mesh
+      const worldPos = screenRef.current.getWorldPosition(new Vector3());
+      const worldQuat = screenRef.current.getWorldQuaternion(new Quaternion());
+
+      // Correction quaternion: rotate -90deg around Y to align HTML plane to screen
+      const correction = new Quaternion().setFromEuler(new Euler(0, -Math.PI / 2, 0));
+      
+      // Multiply the world quaternion by the correction
+      const correctedQuat = worldQuat.multiply(correction);
+
+      return (
         <Html
           transform
+          center
           occlude
-          position={screenRef.current.position.toArray()}
-          rotation={screenRef.current.rotation.toArray()}
-          zIndexRange={[100, 0]}
-          style={{
-            width: '70%',
-            height: '25%',
-            backgroundColor: 'red',
-            borderRadius: '6px',
-          }}
-        />
-      )
-      }
-    </>
+          position={worldPos.clone().add(new Vector3(0, 0, 0.05)).toArray()}
 
-  );
+          quaternion={correctedQuat}
+          zIndexRange={[100, 0]}
+        >
+          <div
+            style={{
+              width: '100px',
+              height: '50px',
+              borderRadius: '6px',
+              pointerEvents: 'auto',
+              backfaceVisibility: 'hidden'
+            }}
+
+            className='bg-gray-800/70'
+          />
+        </Html>
+      );
+    })()}
+  </>
+);
+
 }
 
 useGLTF.preload('/ipod.glb');

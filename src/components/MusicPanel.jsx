@@ -1,35 +1,52 @@
-import React from 'react';
-import { Html } from '@react-three/drei';
-import { Euler, Quaternion, Vector3 } from 'three';
+import React, { useEffect, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { Color, Euler, MeshBasicMaterial, MeshPhysicalMaterial, Quaternion } from 'three';
+import { useAtomValue } from 'jotai';
+import { screenMaterialAtom } from '../lib/applyScreenTexture';
+
 
 export default function MusicPanel({ screenRef }) {
-  if (!screenRef.current) return null;
+  const groupRef = useRef();
+  const panelRef = useRef();
+  //Using Atoms to get Screen Materials to get  
+  const screenMaterial = useAtomValue(screenMaterialAtom)
 
-  const worldPos = screenRef.current.getWorldPosition(new Vector3());
-  const worldQuat = screenRef.current.getWorldQuaternion(new Quaternion());
+  //Matching Panel Material to Screen Material
+  const material = new MeshPhysicalMaterial({
+    color: 'red',                     
+    transparent: true,
+    opacity: 0.9,
+    depthWrite: false,
+    depthTest: false,
+    roughness: screenMaterial?.roughness ?? 0.5,
+    metalness: screenMaterial?.metalness ?? 0,
+    ior: screenMaterial?.ior ?? 1.5,
+  });
 
-  const correction = new Quaternion().setFromEuler(new Euler(0, -Math.PI / 2, 0));
-  const correctedQuat = worldQuat.multiply(correction);
+  const correctionQuat = new Quaternion().setFromEuler(new Euler(0, Math.PI / 2, 0));
+  const tempQuat = new Quaternion();
+
+  useFrame(() => {
+    if (!screenRef?.current || !groupRef.current) return;
+
+    // Match position
+    screenRef.current.getWorldPosition(groupRef.current.position);
+
+    // Match rotation with correction
+    screenRef.current.getWorldQuaternion(tempQuat);
+    groupRef.current.quaternion.copy(tempQuat).multiply(correctionQuat);
+
+    // Match scale (optional)
+    groupRef.current.scale.copy(screenRef.current.scale);
+  });
+
 
   return (
-    <Html
-      transform
-      center
-      occlude
-      position={worldPos.clone().add(new Vector3(0, 0, 0.05)).toArray()}
-      quaternion={correctedQuat}
-      zIndexRange={[100, 0]}
-    >
-      <div
-        className="bg-gray-800/70"
-        style={{
-          width: '100px',
-          height: '50px',
-          borderRadius: '6px',
-          pointerEvents: 'auto',
-          backfaceVisibility: 'hidden',
-        }}
-      />
-    </Html>
+    <group ref={groupRef}>
+      <mesh ref={panelRef} position={[0, 0, 0]} material={material}>
+        {/* About 300x200 pixels, scaled to roughly fit your iPod model */}
+        <planeGeometry args={[2.5, 1]} />
+      </mesh>
+    </group>
   );
 }

@@ -1,8 +1,12 @@
+import { atom } from 'jotai';
 import {
   MeshPhysicalMaterial,
   SRGBColorSpace,
   TextureLoader,
 } from 'three';
+
+
+export const screenMaterialAtom = atom(null)
 
 export function applyScreenTexture(screenMesh, textureURL, onDone) {
   if (!screenMesh) return console.warn('⚠️ screen mesh not found');

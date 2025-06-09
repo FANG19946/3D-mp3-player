@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { Color, Euler, MeshBasicMaterial, MeshPhysicalMaterial, Quaternion } from 'three';
 import { useAtomValue } from 'jotai';
 import { screenMaterialAtom } from '../lib/applyScreenTexture';
+import Button from './Button';
 
 
 export default function MusicPanel({ screenRef }) {
@@ -13,7 +14,7 @@ export default function MusicPanel({ screenRef }) {
 
   //Matching Panel Material to Screen Material
   const material = new MeshPhysicalMaterial({
-    color: 'red',                     
+    color: 'red',
     transparent: true,
     opacity: 0.9,
     depthWrite: false,
@@ -47,6 +48,20 @@ export default function MusicPanel({ screenRef }) {
         {/* About 300x200 pixels, scaled to roughly fit your iPod model */}
         <planeGeometry args={[2.5, 1]} />
       </mesh>
+      <Button
+        type="play"
+        position={[0, 0, 0]}
+      
+        onClick={() => console.log('Play button clicked')}
+      />
+      {/* <Button
+        type="next"
+        position={[0.8, 0, 0]}
+        
+        onClick={() => console.log('Play button clicked')}
+      />
+       */}
+
     </group>
   );
 }

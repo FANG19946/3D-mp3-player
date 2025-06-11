@@ -54,13 +54,13 @@ export default function MusicPanel({ screenRef }) {
       
         onClick={() => console.log('Play button clicked')}
       />
-      {/* <Button
+      <Button
         type="next"
         position={[0.8, 0, 0]}
         
         onClick={() => console.log('Play button clicked')}
       />
-       */}
+      
 
     </group>
   );

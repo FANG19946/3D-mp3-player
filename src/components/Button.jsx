@@ -3,6 +3,7 @@ import { useLoader } from '@react-three/fiber';
 import { TextureLoader, MeshPhysicalMaterial } from 'three';
 import { useAtomValue } from 'jotai';
 import { screenMaterialAtom } from '../lib/applyScreenTexture';
+import { makeButtonMaterial } from '../lib/makeButtonMaterial';
 
 export default function Button({
   type,
@@ -13,17 +14,11 @@ export default function Button({
   const screenMaterial = useAtomValue(screenMaterialAtom);
   const texture = useLoader(TextureLoader, `/${type}.png`);
 
-  const material = useMemo(() => {
+ const material = useMemo(() => {
   if (!screenMaterial || !texture) return null;
-
-  const mat = screenMaterial.clone();
-  mat.map = texture;
-  mat.transparent = true;
-  mat.depthWrite = false;
-  mat.depthTest = false;
-  mat.needsUpdate = true;
-  return mat;
+  return makeButtonMaterial(texture, screenMaterial);
 }, [screenMaterial, texture]);
+
 
 
   return (
@@ -31,6 +26,8 @@ export default function Button({
       position={position}
       material={material}
       onPointerDown={onClick}
+      frustumCulled={false}
+      renderOrder={1}
     >
       <planeGeometry args={size} />
     </mesh>

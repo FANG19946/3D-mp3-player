@@ -1,14 +1,52 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Color, Euler, MeshBasicMaterial, MeshPhysicalMaterial, Quaternion } from 'three';
 import { useAtomValue } from 'jotai';
 import { screenMaterialAtom } from '../lib/applyScreenTexture';
 import Button from './Button';
+import { songs } from '../lib/songs';
+import { loadAndPlay, togglePlay } from '../lib/audioController';
 
 
 export default function MusicPanel({ screenRef }) {
   const groupRef = useRef();
   const panelRef = useRef();
+
+  // Hooks for controlling songs in playlist
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const currentSong = songs[currentIndex];
+
+
+
+  // Loading and Playing First song in playlist
+  useEffect(() => {
+    loadAndPlay(currentSong);
+    setIsPlaying(true);
+  }, [currentIndex]);
+
+  // Handler Functions that set states and call audio controller functions
+  const handleTogglePlay = () => {
+    togglePlay();
+    setIsPlaying(prev => !prev);
+  };
+
+  const handleNext = () => {
+    const nextIndex = (currentIndex + 1) % songs.length;
+    setCurrentIndex(nextIndex);
+    loadAndPlay(songs[nextIndex]);
+    setIsPlaying(true);
+  };
+
+  const handlePrev = () => {
+    const prevIndex = (currentIndex - 1 + songs.length) % songs.length;
+    setCurrentIndex(prevIndex);
+    loadAndPlay(songs[prevIndex]);
+    setIsPlaying(true);
+  };
+
+
+
   //Using Atoms to get Screen Materials to get  
   const screenMaterial = useAtomValue(screenMaterialAtom)
 
@@ -49,18 +87,24 @@ export default function MusicPanel({ screenRef }) {
         <planeGeometry args={[2.5, 1]} />
       </mesh>
       <Button
-        type="play"
+        type={isPlaying ? 'pause' : 'play'}
         position={[0, 0, 0]}
-      
-        onClick={() => console.log('Play button clicked')}
+
+        onClick={handleTogglePlay}
       />
       <Button
         type="next"
         position={[0.8, 0, 0]}
-        
-        onClick={() => console.log('Play button clicked')}
+
+        onClick={handleNext}
       />
-      
+      <Button
+        type="previous"
+        position={[-0.8, 0, 0]}
+
+        onClick={handlePrev}
+      />
+
 
     </group>
   );

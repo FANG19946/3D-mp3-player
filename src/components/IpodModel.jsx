@@ -3,6 +3,7 @@ import { useGLTF } from '@react-three/drei';
 import { applyScreenTexture } from '../lib/applyScreenTexture';
 import { useSetAtom } from 'jotai';
 import { screenMaterialAtom } from '../lib/applyScreenTexture';
+import { songs } from '../lib/songs';
 
 
 
@@ -16,7 +17,7 @@ export default function IpodModel({ groupRef, screenRef, onTextureApplied, ...pr
     const screenMesh = groupRef.current.getObjectByName('screen');
     if (screenMesh) {
       screenRef.current = screenMesh;
-      applyScreenTexture(screenMesh, '/51uKuWtPQAL._UF1000,1000_QL80_.jpg', () => {
+      applyScreenTexture(screenMesh, songs[0].albumArt, () => {
         setScreenMaterial(screenMesh.material); // 👈 atom is updated here
         onTextureApplied?.();
       });

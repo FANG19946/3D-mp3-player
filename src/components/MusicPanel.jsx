@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Color, Euler, MeshBasicMaterial, MeshPhysicalMaterial, Quaternion } from 'three';
 import { useAtomValue } from 'jotai';
-import { screenMaterialAtom } from '../lib/applyScreenTexture';
+import { applyScreenTexture, screenMaterialAtom } from '../lib/applyScreenTexture';
 import Button from './Button';
 import { songs } from '../lib/songs';
 import { loadAndPlay, togglePlay } from '../lib/audioController';
@@ -21,7 +21,7 @@ export default function MusicPanel({ screenRef }) {
 
   // Loading and Playing First song in playlist
   useEffect(() => {
-    loadAndPlay(currentSong);
+    loadAndPlay(currentSong, screenRef.current);
     setIsPlaying(true);
   }, [currentIndex]);
 
@@ -34,14 +34,14 @@ export default function MusicPanel({ screenRef }) {
   const handleNext = () => {
     const nextIndex = (currentIndex + 1) % songs.length;
     setCurrentIndex(nextIndex);
-    loadAndPlay(songs[nextIndex]);
+    loadAndPlay(songs[nextIndex], screenRef.current);
     setIsPlaying(true);
   };
 
   const handlePrev = () => {
     const prevIndex = (currentIndex - 1 + songs.length) % songs.length;
     setCurrentIndex(prevIndex);
-    loadAndPlay(songs[prevIndex]);
+    loadAndPlay(songs[prevIndex], screenRef.current);
     setIsPlaying(true);
   };
 
